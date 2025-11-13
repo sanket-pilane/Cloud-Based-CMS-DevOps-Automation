@@ -1,0 +1,47 @@
+---
+- name: Deploy CMS with Docker Compose
+  hosts: web
+  become: true
+  vars:
+    repo_url: "https://github.com/youruser/your-repo.git" # <— replace with your repo URL
+    app_dir: /opt/cms
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - git
+          - docker.io
+          - docker-compose-plugin
+        state: present
+
+    - name: Ensure docker service is started
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create app directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Clone repository
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ app_dir }}"
+        version: HEAD
+        force: yes
+
+    - name: Pull and run docker-compose
+      community.docker.docker_compose:
+        project_src: "{{ app_dir }}"
+        restarted: yes
+        pull: yes
