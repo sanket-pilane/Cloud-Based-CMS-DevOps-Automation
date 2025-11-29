@@ -1,65 +1,83 @@
 # ☁️ Cloud-Based CMS Automation using DevOps Toolchain
 
-This project demonstrates a full, end-to-end DevOps pipeline for deploying a **Content Management System (CMS)**, similar to a basic blogging platform[cite: 20]. It leverages industry-standard tools to achieve Infrastructure as Code (IaC), continuous configuration, CI/CD, and continuous operational visibility[cite: 35, 36].
+This project demonstrates a complete end-to-end DevOps workflow for deploying a **Content Management System (CMS)** on a cloud-based Ubuntu server. The solution combines Infrastructure as Code, state enforcement, CI/CD, and continuous monitoring to enable a fully automated production-grade deployment.
 
-The architecture provisions a target **Ubuntu Linux** virtual machine and deploys a containerized MERN-stack application[cite: 24, 22].
+The architecture provisions a target **Ubuntu Linux virtual machine** and deploys a containerized **MERN-stack CMS application**.
 
 ## ✨ Key Technology Stack
 
-This project successfully integrates all major DevOps phases: Provisioning, Configuration, CI/CD, and Monitoring.
-
 | Category                | Tool / Technology                           | Purpose                                                                                                            |
 | :---------------------- | :------------------------------------------ | :----------------------------------------------------------------------------------------------------------------- |
-| **Frontend**            | React.js / HTML, CSS, JavaScript [cite: 29] | User-friendly CMS interface.                                                                                       |
-| **Backend**             | Node.js with Express.js [cite: 29]          | Provides RESTful API endpoints for content management.                                                             |
-| **Database**            | MongoDB [cite: 29]                          | NoSQL database for storing article content.                                                                        |
-| **Containerization**    | Docker [cite: 29]                           | Packages the backend application for consistent deployment.                                                        |
-| **IaC Provisioning**    | **Terraform** [cite: 32]                    | Automates the creation of the entire cloud infrastructure (Ubuntu VM, networking, security groups).                |
-| **CI/CD Orchestration** | **Jenkins** [cite: 32]                      | Orchestrates the workflow: code pull, Docker build, and deployment via Ansible.                                    |
-| **Configuration**       | **Ansible** [cite: 32]                      | Installs dependencies (Node.js, Docker Engine) and handles post-provisioning tasks on the Ubuntu server[cite: 25]. |
-| **State Enforcement**   | **Puppet** [cite: 32]                       | Ensures critical configurations, like the NGINX reverse proxy, maintain their desired state over time[cite: 25].   |
-| **Monitoring**          | **Nagios** [cite: 32]                       | Provides real-time monitoring of web service uptime and key server health metrics (CPU, RAM, Disk)[cite: 26, 33].  |
+| **Frontend**            | React.js / HTML / CSS / JavaScript          | User-friendly CMS interface.                                                                                       |
+| **Backend**             | Node.js with Express.js                     | RESTful API endpoints for content management.                                                                      |
+| **Database**            | MongoDB                                     | NoSQL database for storing articles and user content.                                                              |
+| **Containerization**    | Docker                                      | Packages and runs the backend application in a portable, lightweight container.                                    |
+| **IaC Provisioning**    | Terraform                                    | Automates the creation of cloud infrastructure (VM, networking, security groups).                                   |
+| **CI/CD Orchestration** | Jenkins                                      | Automates the build process: pull code, build Docker image, and trigger deployment.                                |
+| **Configuration**       | Ansible                                      | Installs dependencies (Node.js, Docker Engine) and deploys CMS containers on the server.                           |
+| **State Enforcement**   | Puppet                                       | Ensures NGINX reverse-proxy configuration remains in the correct and desired state.                                |
+| **Monitoring**          | Nagios                                       | Sends uptime alerts and monitors server resources (CPU, memory, disk, service availability).                       |
 
 ## 🚀 Deployment Workflow Overview
 
-The system follows a fully automated continuous delivery model:
-
-1.  **Provisioning:** **Terraform** provisions the base **Ubuntu Linux VM** and networking on the cloud[cite: 24, 32].
-2.  **CI/CD Trigger:** A commit to the GitHub repository triggers the **Jenkins** pipeline.
-3.  **Build & Deploy:** Jenkins pulls the code, builds the **Docker image** for the Node.js backend, and triggers the Ansible deployment.
-4.  **Configuration:** **Ansible** prepares the server (installs Docker Engine) and deploys the containerized application[cite: 32].
-5.  **State Management:** **Puppet** ensures the **NGINX** reverse proxy configuration remains correct[cite: 32].
-6.  **Monitoring:** **Nagios** provides continuous alerts and operational visibility[cite: 26].
+1. **Provisioning:** Terraform provisions the cloud Ubuntu VM and networking resources.
+2. **Git Push Trigger:** A commit to the repository triggers the Jenkins pipeline.
+3. **Build & Deploy:** Jenkins pulls the code, builds the Docker image, and triggers the Ansible deployment.
+4. **Server Configuration:** Ansible installs Docker, pulls application images, and deploys containers.
+5. **State Management:** Puppet ensures NGINX reverse-proxy configuration stays correct over time.
+6. **Monitoring:** Nagios monitors application and server health.
 
 ## ⚙️ Project Structure
 
-The repository is organized to clearly separate the application code from the automation scripts:
+```
+.
+├── application/    # MERN CMS source code
+│   ├── backend/    # Node.js/Express API + Dockerfile
+│   └── frontend/   # React.js application
+├── terraform/      # Infrastructure as Code (.tf files)
+├── ansible/        # Ansible playbooks (.yml)
+├── puppet/         # Puppet manifests (.pp)
+├── jenkins/        # Jenkinsfile for CI/CD pipeline
+└── nagios/         # Nagios configuration files (.cfg)
+```
 
-. ├── application/ # The core MERN CMS application code │ ├── backend/ # Node.js/Express API and Dockerfile │ └── frontend/ # React.js application ├── terraform/ # Infrastructure as Code (.tf files) ├── ansible/ # Ansible playbooks (.yml) ├── puppet/ # Puppet manifests (.pp) ├── jenkins/ # Jenkinsfile for CI/CD pipeline └── nagios/ # Nagios configuration files (.cfg)
+## 🛠️ Setup & Execution
 
-## 🛠️ Setup and Execution
+### 1️⃣ Configure Cloud Credentials
+Ensure your cloud provider credentials (AWS, Azure, GCP, etc.) are configured locally for Terraform.
 
-### 1. Configure Cloud Provider Credentials
-
-Ensure your cloud provider credentials (AWS, Azure, GCP, etc.) are configured for **Terraform** execution.
-
-### 2. Terraform (Infrastructure Provisioning)
-
-Navigate to the `terraform/` directory and apply the configuration to provision the necessary cloud resources:
-
+### 2️⃣ Terraform — Provision Infrastructure
 ```bash
-# Initialize Terraform
+cd terraform
 terraform init
-
-# Review the plan
 terraform plan
-
-# Apply the infrastructure changes
 terraform apply
 ```
 
-3. Jenkins (CI/CD Pipeline)
-   Configure a Jenkins job to pull this repository and use the provided jenkins/Jenkinsfile. The pipeline will automatically execute the build and deployment steps via Ansible on the newly provisioned Ubuntu VM.
+### 3️⃣ Jenkins — CI/CD Pipeline
+Configure a Jenkins job to:
+- Pull this repository
+- Execute the `jenkins/Jenkinsfile`
+- Build Docker image and trigger Ansible deployment
 
-4. Monitoring
-   Once deployment is complete, import the configuration files from the nagios/ directory into your Nagios server to begin monitoring the web service and server health.
+### 4️⃣ Ansible — Deploy CMS
+Ansible installs Docker, pulls images, and deploys application containers.
+
+### 5️⃣ Puppet — State Enforcement
+Puppet maintains the NGINX reverse-proxy configuration and ensures desired state consistency.
+
+### 6️⃣ Nagios — Monitoring
+Import Nagios configuration from the `nagios/` directory to enable server and service health monitoring.
+
+## 🎯 Summary of Automation
+
+| Phase                     | Automated by         |
+|---------------------------|----------------------|
+| Infrastructure Provision  | Terraform            |
+| Build / Deployment        | Jenkins + Docker     |
+| Configuration             | Ansible              |
+| State Enforcement         | Puppet               |
+| Monitoring                | Nagios               |
+
+## 🤝 Contributions
+Pull requests and suggestions are welcome.
